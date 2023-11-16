@@ -1,0 +1,66 @@
+---
+title: "Data Science for Public Policy"
+subtitle: "Final Project"
+author: "Zehui Li Lezhi Cao, Mujin Li, Xinwen Zhang"
+execute:
+  warning: false
+format:
+  html:
+    embed-resources: true
+editor: visual
+---
+
+## library packages
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(tidymodels)
+library(themis)
+library(recipes)
+library(parsnip)
+library(ranger)
+library(ggplot2)
+library(vip)
+library(patchwork)
+library(stringr)
+```
+
+## Data preprocessing
+
+-   drug death: data from xinwen
+
+```{r}
+drugdeath<-read_csv("/Users/macbookpro/Desktop/finalproj/Final-Project/drugdeath.csv")
+
+names(drugdeath) <- names(drugdeath) %>%
+  ## lower-case all of the letters in the column names 
+  str_to_lower()
+#Remove the column "flag," which contains unknown information "*".
+drugdeath<-drugdeath%>%
+  select(-"flag")
+
+```
+
+-    12 month-ending provisional count and percent change of drug overdose death
+
+    \[data from National Vital Statistics System\](<https://www.cdc.gov/nchs/nvss/vsrr/drug-overdose-data.htm>)
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
