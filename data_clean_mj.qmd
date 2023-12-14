@@ -1,0 +1,155 @@
+---
+title: "Data Science for Public Policy"
+subtitle: "Final Project"
+author: "Lezhi Cao,Mujin Li,Zehui Li,Xinwen Zhang"
+execute:
+  warning: false
+format:
+  html:
+    embed-resources: true
+---
+
+## Project Proposal
+
+
+
+
+## Data Description and Clean
+在这个项目中我们使用了来自多个来源的数据，我们选取的数据主要时间是从2015-2022年各州的不同指标，其中包括poverty rate，population，median income，high school graduation numbers，land area， water area， total area，unemployment rate。获取这些数据的方法主要包括网络直接下载，以及API获取。由于不同来源的数据有不同的格式，在清洗的步骤中，我们通过使用pivot_longer，以及columnnames等命令，将数据转换成同样的格式，方便我们对于数据进行合并以及清洗。在初步观察data之后，删除掉了缺少较多数据的变量，一些较少的缺失值我们使用0去代替
+
+### Load the Package
+```{r}
+library(tidyverse)
+library(tidycensus)
+library(readxl)
+
+```
+
+### Merge the data set
+
+```{r}
+# read all the dataset
+poverty_fp <- read_csv("poverty.csv")
+unemployment_fp <- read_xlsx("unemploymentrateus2015-2022.xlsx")
+gdp_fp <- read_xlsx("GDP.xlsx")
+population_fp <- read_xlsx("Population.xlsx")
+area_fp <- read_xlsx("state_area.xlsx")
+income_fp <- read_xlsx("income2015-2022.xlsx")
+overdose_fp <- read_excel("overdose_mortality_rate.xlsx")
+
+## Using api retrive data of high school graduation numbers in Census Bureau from 2015-2022
+census_api_key("cfab8343b6fb4bb0a3356fee1e9224c852a28e6a", install = TRUE, overwrite = TRUE)
+dataneed <- load_variables(2022,"acs5",cache = TRUE)
+### get every years data using the fuction
+years <- c(2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022)
+all_edu_data <- list()  # store in the list
+for (year in years) {
+  edu_data <- get_acs(geography = "state",
+                      variable = c(high_school_grad_number = "B06009_003"),
+                      year = year)
+  edu_data$year <- year
+  all_edu_data[[as.character(year)]] <- edu_data  
+}
+edu_fp <- bind_rows(all_edu_data)
+edu_fp<- edu_fp%>%select(-moe,-variable)
+colnames(edu_fp)[3] = "high_school_grad_number"
+colnames(edu_fp)[2] = "state"
+edu_fp <-edu_fp[-1]
+edu_fp
+```
+
+```{r}
+# merge the table one-by-one
+## poverty and unemployment rate
+unemployment_long <- unemployment_fp %>% pivot_longer(cols = -1, 
+               names_to = "year", 
+               values_to = "unemployment_rate")
+pov_unemploy <- merge(poverty_fp, unemployment_long, by.x = c("year", "name"), by.y = c("year", "State"), all = TRUE)
+
+## poverty, unemployment rate, GDP
+colnames(gdp_fp)[1] = "state"
+gdp_long <- gdp_fp %>% pivot_longer(cols = -1, 
+               names_to = "year", 
+               values_to = "gdp")
+pov_unemploy_gdp <- merge(pov_unemploy, gdp_long, by.x = c("year", "name"), by.y = c("year", "state"), all = TRUE)
+
+## poverty, unemployment rate, GDP, population
+colnames(population_fp)[1]="state"
+colnames(population_fp)[2:9]<-2015:2022
+population_fp <-population_fp[-1,]
+population_fp$state <- sub("^\\.", "", population_fp$state)
+population_long <- population_fp %>% pivot_longer(cols = -1, 
+               names_to = "year", 
+               values_to = "population")
+pov_unemploy_gdp_pop <- merge(pov_unemploy_gdp, population_long, by.x = c("year", "name"), by.y = c("year", "state"), all = TRUE)
+
+## poverty, unemployment rate, GDP, population, income
+income_long <- income_fp %>% pivot_longer(cols = -1, 
+               names_to = "year", 
+               values_to = "income")
+pov_unemploy_gdp_pop_income <- merge(pov_unemploy_gdp_pop, income_long, by.x = c("year", "name"), by.y = c("year", "state"), all = TRUE)
+
+## poverty, unemployment rate, GDP, population, income, area
+area_fp2 <- area_fp %>%
+  select(state,total_area_sq_km,land_area_sq_km,water_area_sq_km)
+pov_unemploy_gdp_pop_income_area <-pov_unemploy_gdp_pop_income%>%
+  left_join(area_fp2, by = c("name" = "state"))
+
+## poverty, unemployment rate, GDP, population, income, area, high school graduation numbers
+pov_unemploy_gdp_pop_income_area_edu <- merge(pov_unemploy_gdp_pop_income_area, edu_fp, by.x = c("year", "name"), by.y = c("year", "state"), all = TRUE)
+
+## poverty, unemployment rate, GDP, population, income, area, high school graduation numbers, overdose
+
+overdose_fp2 <- overdose_fp %>% filter(year>=2015)
+
+# we find the overdose rate data only have state abbreviarion, we need to add the state full name in to this dataset
+state <- data.frame(
+  State = c(
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
+    "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
+    "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan",
+    "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+    "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma",
+    "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
+    "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming","Distric of Columbia"
+  ),
+  stateid = c(
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
+    "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
+    "VA", "WA", "WV", "WI", "WY","DC"
+  )
+)
+overdose_fp3 <-overdose_fp2%>%
+  left_join(state, by = c("state" = "stateid"))
+overdose_fp3 <-overdose_fp3[-2]
+all_data <- merge(pov_unemploy_gdp_pop_income_area_edu, overdose_fp3, by.x = c("year", "name"), by.y = c("year", "State"), all = TRUE)
+
+all_data
+```
+
+```{r}
+# clean the data
+## drop the useless or have to much missing value data
+all_data2 <-all_data[-3]
+all_data3 <-all_data2[-3]
+all_data4 <- all_data3[complete.cases(all_data3$income), ]
+## After checking, we find the dataset missing the data in the poverty rate in 2022
+poverty_2022 <- read_xlsx("povertyrate2022.xlsx")
+str(all_data4)
+str(poverty_2022)
+poverty_2022 <- poverty_2022 %>%
+  mutate(year = as.character(year))
+data_clean <- all_data4 %>%
+  left_join(poverty_2022, by = c("name" = "state", "year")) %>%
+  mutate(percent_in_poverty = coalesce(percent_in_poverty.x, percent_in_poverty.y)) %>%
+  select(-percent_in_poverty.x, -percent_in_poverty.y)
+
+write.csv(data_clean, file = "data_clean_mj.csv")
+```
+
+
+
+
+
+
