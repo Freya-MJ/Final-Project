@@ -15,7 +15,11 @@ format:
 
 
 ## Data Description and Clean
-在这个项目中我们使用了来自多个来源的数据，我们选取的数据主要时间是从2015-2022年各州的不同指标，其中包括poverty rate，population，median income，high school graduation numbers，land area， water area， total area，unemployment rate。获取这些数据的方法主要包括网络直接下载，以及API获取。由于不同来源的数据有不同的格式，在清洗的步骤中，我们通过使用pivot_longer，以及columnnames等命令，将数据转换成同样的格式，方便我们对于数据进行合并以及清洗。在初步观察data之后，删除掉了缺少较多数据的变量，一些较少的缺失值我们使用0去代替
+In this project, we compiled data from various sources spanning the years 2015 to 2022, encompassing a wide array of indicators for each state. These indicators include poverty rates, population figures, median income levels, high school graduation numbers, land area, water area, and unemployment rates. To procure this diverse dataset, we employed a combination of methods, including direct web downloads and API access.
+
+Given the heterogeneous formats of data from different sources, our data cleaning process was crucial. We harnessed tools like `pivot_longer` and `columnnames` to standardize the data format, making it amenable for merging and subsequent cleaning operations. 
+
+After an initial examination of the data, we systematically addressed missing values by either removing variables with significant data gaps or imputing missing values with zeros. This rigorous data preparation phase ensured the integrity and consistency of our dataset, setting the stage for robust analysis and insights.
 
 ### Load the Package
 ```{r}
@@ -55,7 +59,6 @@ edu_fp<- edu_fp%>%select(-moe,-variable)
 colnames(edu_fp)[3] = "high_school_grad_number"
 colnames(edu_fp)[2] = "state"
 edu_fp <-edu_fp[-1]
-edu_fp
 ```
 
 ```{r}
@@ -125,7 +128,6 @@ overdose_fp3 <-overdose_fp2%>%
 overdose_fp3 <-overdose_fp3[-2]
 all_data <- merge(pov_unemploy_gdp_pop_income_area_edu, overdose_fp3, by.x = c("year", "name"), by.y = c("year", "State"), all = TRUE)
 
-all_data
 ```
 
 ```{r}
@@ -136,8 +138,6 @@ all_data3 <-all_data2[-3]
 all_data4 <- all_data3[complete.cases(all_data3$income), ]
 ## After checking, we find the dataset missing the data in the poverty rate in 2022
 poverty_2022 <- read_xlsx("povertyrate2022.xlsx")
-str(all_data4)
-str(poverty_2022)
 poverty_2022 <- poverty_2022 %>%
   mutate(year = as.character(year))
 data_clean <- all_data4 %>%
