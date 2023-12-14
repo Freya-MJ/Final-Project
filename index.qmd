@@ -24,6 +24,9 @@ library(ggplot2)
 library(vip)
 library(patchwork)
 library(stringr)
+library(tidyclust)
+library(tidymodels)
+library(Rfast)
 ```
 
 ## Data preprocessing
@@ -39,28 +42,201 @@ names(drugdeath) <- names(drugdeath) %>%
 #Remove the column "flag," which contains unknown information "*".
 drugdeath<-drugdeath%>%
   select(-"flag")
-
+drugdeath
 ```
 
--    12 month-ending provisional count and percent change of drug overdose death
+-   12 month-ending provisional count and percent change of drug overdose death
 
-    \[data from National Vital Statistics System\](<https://www.cdc.gov/nchs/nvss/vsrr/drug-overdose-data.htm>)
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+```         
+[data from National Vital Statistics System](https://www.cdc.gov/nchs/nvss/vsrr/drug-overdose-data.htm)
+```
 
 ```{r}
-1 + 1
+monthcount<-read_csv("/Users/macbookpro/Desktop/finalproj/Final-Project/VSRR_Provisional_Drug_Overdose_Death_Counts.csv")
+names(monthcount) <- names(monthcount) %>%
+  ## lower-case all of the letters in the column names 
+  str_to_lower()
+monthcount
 ```
 
-You can add options to executable code like this
+## model
 
 ```{r}
-#| echo: false
-2 * 2
+data<-read_csv("/Users/macbookpro/Desktop/finalproj/Final-Project/data_finalproject.csv")
+
+povertynew<-read_excel("/Users/macbookpro/Desktop/finalproj/Final-Project/povertyrate.xlsx")
+
+povertynew<-povertynew%>%
+  pivot_longer(!name,
+               names_to = "year",
+               values_to = "poverty")
+
+povertynew <- povertynew %>% 
+  mutate(year = as.double(year))%>%
+  rename("povertyrate"="poverty")
+
+povertyold<-data%>%
+   select("name","year","percent_in_poverty")%>%
+  rename("povertyrate"="percent_in_poverty")
+
+povertyold<-povertyold%>%
+  filter(year<2019)
+
+poverty<-bind_rows(povertynew,povertyold,id=NULL)
+
+data_clean<-left_join(data,poverty,by=c("name","year"))
+
+hs<-read_csv("/Users/macbookpro/Desktop/finalproj/Final-Project/hs.csv")%>%
+  select(-1,-2)%>%
+  rename("name"="state")
+
+data_clean<-left_join(data_clean,hs,by=c("name","year"))
+
+data_clean<-data_clean%>%
+  select(-"percent_in_poverty",-"data_totals_violent_all",-"data_totals_property_all",-"number_in_poverty")
+
+data_clean%>%
+  group_by(name)%>%
+  summarise(missing_values = sum(is.na(poverty)))
+
+data_clean <- data_clean %>%
+  mutate_all(~ replace(., is.na(.), 0))
+
+data_clean<-data_clean%>%
+  select(-1)
+
+data_clean<-data_clean%>%
+  filter(year<2022)
+
+write.csv(data_clean, file = "/Users/macbookpro/Desktop/finalproj/Final-Project/data_clean.csv", row.names = FALSE)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+set.seed(1214)
+kmeans_cv <- vfold_cv(data_clean, v = 3)
+```
+
+### Kmeans
+
+```{r}
+kmeans_rec<-recipe(~., data = data_clean)%>%
+  update_role(name,abbreviation,new_role = "ID")%>%
+  step_dummy(all_nominal_predictors())%>%
+  step_normalize(all_predictors())%>%
+  step_pca(all_numeric(), threshold = .90)%>%
+  prep()
+
+kmeans<-bake(kmeans_rec, new_data = data_clean)
+
+kmeans_spec <- k_means(
+  num_clusters = tune()
+) %>%
+  set_engine(
+    "stats",
+    nstart = 100 
+  )
+
+kmeans_wflow <- workflow(
+  preprocessor = kmeans_rec,
+  spec = kmeans_spec
+)
+
+kmeans_wflow <- workflow() %>%
+  add_recipe(kmeans_rec) %>%
+  add_model(kmeans_spec)
+# create a tuning gird to consider 1 to 10 clusters
+clust_num_grid <- grid_regular(
+  num_clusters(), 
+  levels = 10
+)
+# tune the k-means clustering algorithm
+res <- tune_cluster(
+  object = kmeans_wflow,
+  resamples = kmeans_cv,
+  grid = clust_num_grid,
+  control = control_grid(save_pred = TRUE),
+  metrics = cluster_metric_set(sse_within_total,silhouette_avg)
+)
+
+wss<-res%>%
+  collect_metrics() %>%
+  filter(.metric == "sse_within_total")
+wss
+
+silhouette<-res%>%
+  collect_metrics() %>%
+  filter(.metric == "silhouette_avg")
+silhouette
+
+# select by plot
+wss_plot<-res %>%
+  collect_metrics() %>%
+  filter(.metric == "sse_within_total") %>%
+  ggplot(aes(x = num_clusters, y = mean)) +
+  geom_point() + 
+  geom_line() + 
+  scale_x_continuous(breaks = 1:10) +
+  labs(
+    x = "Number of clusters",
+    y = "mean WSS over 5 folds"
+  ) +
+  theme_minimal() 
+wss_plot
+silhouette<-res%>%
+  collect_metrics() %>%
+  filter(.metric == "silhouette_avg") %>%
+  ggplot(aes(x = num_clusters, y = mean)) +
+  geom_point() + 
+  geom_line() + 
+  scale_x_continuous(breaks = 1:10) +
+  labs(
+    x = "Number of clusters",
+    y = "mean silhouette_avg over 5 folds"
+  ) +
+  theme_minimal() 
+silhouette
+#optimal cluster for wss is 4 and for silhouette is 4
+```
+
+```{r}
+kmean_plot<-bake(kmeans_rec,new_data = data_clean)%>%
+  select("PC1","PC2")
+
+kmeans_spec_final <- k_means(
+  num_clusters = 4 # number of clusters
+) %>%
+  set_engine(
+    "stats",
+    nstart = 100 # number of random starts
+  )
+
+# create the final workflow
+kmeans_wflow_final <- workflow(
+  preprocessor =kmeans_rec,
+  spec = kmeans_spec_final
+)
+
+# fit the final model
+final_fit <- fit(
+  kmeans_wflow_final,
+  data = data_clean
+)
+
+tidy(final_fit)
+
+clusters <- bind_cols(
+  final_fit %>%
+    extract_recipe() %>%
+    bake(data_clean),
+  cluster = final_fit %>%
+    extract_cluster_assignment() %>%
+    pull(.cluster)
+)
+cluster_plot <- ggplot() +
+  geom_point(data = clusters, mapping = aes(x = PC1, y = PC2,color = factor(cluster)))+
+  labs(title = "K-Means with K = 4 and PCA")+ 
+  # use paste to dynamically include the value of k in the title
+  theme_minimal()
+
+cluster_plot
+```
