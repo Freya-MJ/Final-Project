@@ -140,14 +140,31 @@ all_data4 <- all_data3[complete.cases(all_data3$income), ]
 poverty_2022 <- read_xlsx("povertyrate2022.xlsx")
 poverty_2022 <- poverty_2022 %>%
   mutate(year = as.character(year))
-data_clean <- all_data4 %>%
+data_clean_initial <- all_data4 %>%
   left_join(poverty_2022, by = c("name" = "state", "year")) %>%
   mutate(percent_in_poverty = coalesce(percent_in_poverty.x, percent_in_poverty.y)) %>%
   select(-percent_in_poverty.x, -percent_in_poverty.y)
 
-write.csv(data_clean, file = "data_clean_mj.csv")
+write.csv(data_clean_initial, file = "data_clean_mj.csv")
 ```
 
+# Explotary Data Analysis 
+```{r}
+data <- data_clean_initial
+selected_states <- c("West Virginia", "Ohio", "Delaware", "Maryland")
+filtered_data <- data[data$name %in% selected_states, ]
+filtered_data$year <- as.numeric(filtered_data$year)
+plot_comparison <- ggplot(filtered_data, aes(x = year, y = death_rate)) +
+  geom_line(size = 0.8) +
+  facet_wrap(~name, ncol = 2) + 
+  labs(x = "Year", 
+       y = "Death Rate", 
+       title = "Death Rate Trends for 4 Selected States from 2015 to 2021",
+       subtitle = "The death rate means number of deaths per 100,000 total population.",
+      caption = "CDC/National Center for Health Statistics") +
+  theme_minimal()
+plot_comparison
+```
 
 
 
