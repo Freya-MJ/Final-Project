@@ -294,20 +294,20 @@ highlighting the inherent uncertainty in predictions and the need for
 robust policy frameworks that can adapt to such uncertainties.
 
 #### Visual Analysis
+![Number of clusters](https://github.com/Freya-MJ/Final-Project/blob/main/7.png)
 
-![K-Means with K = 4 and PCA](https://github.com/Freya-MJ/Final-Project/blob/main/5.png)
 **K-Means Clustering:** The scatter plot indicates four distinct
 clusters, suggesting that the dataset can be divided into four groups
 based on the features considered. One cluster, in particular, appears to
 be an outlier, significantly distanced from the others along PC1.
+![K-Means with K = 4 and PCA](https://github.com/Freya-MJ/Final-Project/blob/main/5.png)
 
-![mean WSS over 5 folds](https://github.com/Freya-MJ/Final-Project/blob/main/6.png)
 **WSS Plot:** The elbow plot for WSS shows a sharp decline as the number
 of clusters increases from 1 to 4, after which the decline in WSS slows
 down. This suggests that four clusters provide a reasonable balance
 between within-cluster variance and the number of clusters.
 
-![Number of clusters](https://github.com/Freya-MJ/Final-Project/blob/main/7.png)
+![mean WSS over 5 folds](https://github.com/Freya-MJ/Final-Project/blob/main/6.png)
 **Silhouette Plot:** The silhouette plot supports the choice of four
 clusters, as the mean silhouette score starts to plateau after four
 clusters, indicating that additional clusters do not provide a
