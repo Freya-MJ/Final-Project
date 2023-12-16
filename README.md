@@ -94,19 +94,14 @@ This rigorous data preparation phase ensured the integrity and
 consistency of our dataset, setting the stage for robust analysis and
 insights.
 
-Reference: [Overdose Death: CDC/National Center for Health Statistics](%5Bhttps://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm)](<https://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm>))
-[Poverty: United States Census
-Bureau](%5Bhttps://www.census.gov/library/publications/2023/demo/p60-280.html)](<https://www.census.gov/library/publications/2023/demo/p60-280.html>))
-[Area: World Population
-Review](%5Bhttps://worldpopulationreview.com/state-rankings/states-by-area)](<https://worldpopulationreview.com/state-rankings/states-by-area>))
-[Population: United States Census
-Bureau](%5Bhttps://www.census.gov/popclock/)](<https://www.census.gov/popclock/>))
-[GDP: United States Census
-Bureau](%5Bhttps://data.census.gov/)](<https://data.census.gov/>)) [High
-Scool Graduation Number : United States Census
-Bureau](%5Bhttps://data.census.gov/)](<https://data.census.gov/>))
-[Unemployment Rate : United States Census
-Bureau](%5Bhttps://data.census.gov/)](<https://data.census.gov/>))
+Reference: 
+[Overdose Death: CDC/National Center for Health Statistics](https://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm)
+[Poverty: United States Census Bureau](https://www.census.gov/library/publications/2023/demo/p60-280.html)
+[Area: World Population Review](https://worldpopulationreview.com/state-rankings/states-by-area)
+[Population: United States Census Bureau](https://www.census.gov/popclock/)
+[GDP: United States Census Bureau](https://data.census.gov/) 
+[High Scool Graduation Number : United States Census Bureau](https://data.census.gov/)
+[Unemployment Rate : United States Census Bureau](https://data.census.gov/)
 
 #### Geospatial Analysis
 
