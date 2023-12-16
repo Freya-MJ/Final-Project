@@ -9,11 +9,12 @@ Our team aimed to addressing the alarming rise in drug overdose deaths in the Un
 with 106,699 recorded deaths in 2021.(CDC, 2021) To address this critical issue, our objective is to analyze the overall trend in drug overdose deaths in the United States, examining historical data and identifying patterns and factors that have contributed to this trend. Subsequently, we aim to develop a predictive model that anticipates drug overdose deaths based on demographic, regional variables. This predictive model intend tocontribute in further intervention and prevention efforts to reduce drug overdose fatalities.
 
 ## Aproach:
+- Acess Data through API
 - Geospatial Analysis
 - Data Visualization
-- Supervised Model for Regression Analysis:Supervised regression models will be
-employed to ascertain the influence of demographic and regional variables (e.g., race,
-gender, age, and location) on drug overdose deaths.
+- Supervised Model
+- Unsupervised Model
+- Data imputation
 
 ## Literature Review
 
