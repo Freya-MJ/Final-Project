@@ -24,7 +24,7 @@ the United States, integrating socioeconomic data, geographic
 information, and advanced machine learning techniques to understand and
 predict mortality trends. The method we covered as below:
 
-#### Data Collection and Preprocessing
+#### Data Collection including API
 
 Datasets encompassing poverty rates, unemployment figures, GDP,
 population, area, income levels, and high school graduation rates were
