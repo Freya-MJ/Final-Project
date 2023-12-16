@@ -208,7 +208,7 @@ evident in California and Florida, while West Virginia shows a notable
 intensity in death per capita, indicating that despite its smaller
 population, the impact of drug fatalities is substantial.
 
-![annual drug deaths](https://github.com/Freya-MJ/Final-Project/blob/main/2.png)
+![annual drug deaths](https://github.com/Freya-MJ/Final-Project/blob/main/State%20Distributions%20on%20Drug%20Death.pdf)
 
 The second chart depicts annual drug deaths, with a highlighted region
 between 2017 and 2019. This period shows a marked increase in drug
