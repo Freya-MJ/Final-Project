@@ -24,7 +24,7 @@ the complex drug crisis landscape.
 2.  Use `install.packages()` to install required libraries listed at the
     beginning of the script.
 
-#### API Keys
+#### **API Keys**
 
 For data retrieval, you may need to apply for API keys from sources like
 the United States Census Bureau. Store these keys securely and use them
@@ -200,7 +200,7 @@ strategies and responsive policy-making.
 
 ## Visual Analysis:
 
-![disparities in drug-related deaths across the U.S.](URL_of_the_image)
+![disparities in drug-related deaths across the U.S.](https://github.com/Freya-MJ/Final-Project/blob/main/1.png)
 
 The first map displays significant disparities in drug-related deaths
 across the U.S. from 2015-2021. The highest cumulative deaths are
@@ -208,7 +208,7 @@ evident in California and Florida, while West Virginia shows a notable
 intensity in death per capita, indicating that despite its smaller
 population, the impact of drug fatalities is substantial.
 
-![annual drug deaths](URL_of_the_image)
+![annual drug deaths](https://github.com/Freya-MJ/Final-Project/blob/main/2.png)
 
 The second chart depicts annual drug deaths, with a highlighted region
 between 2017 and 2019. This period shows a marked increase in drug
@@ -241,7 +241,7 @@ visual representation of the models' outputs.
 #### Visual Analysis
 
 ![Aggregate National Distribution of State Drug Death in the US: 2015 -
-2021](URL_of_the_image)
+2021](https://github.com/Freya-MJ/Final-Project/blob/main/3.png)
 
 Analyzing the first image, a ridge plot showcases the distribution of
 drug deaths across states from 2015 to 2021. The peaks and valleys in
@@ -251,7 +251,7 @@ contrast between the highest and lowest quartiles, indicating a growing
 disparity in drug deaths across states.
 
 ![Predicted Drug Death Rates for Different States in the
-US](URL_of_the_image)
+US](https://github.com/Freya-MJ/Final-Project/blob/main/4.png)
 
 The second image comprises two maps predicting drug death rates using
 Ridge Regression and Random Forest models. Both maps display variations
@@ -304,45 +304,52 @@ robust policy frameworks that can adapt to such uncertainties.
 
 #### Visual Analysis
 
-![K-Means with K = 4 and PCA](URL_of_the_image)
+![K-Means with K = 4 and PCA](https://github.com/Freya-MJ/Final-Project/blob/main/5.png)
 
 **K-Means Clustering:** The scatter plot indicates four distinct
 clusters, suggesting that the dataset can be divided into four groups
 based on the features considered. One cluster, in particular, appears to
 be an outlier, significantly distanced from the others along PC1.
 
-![mean WSS over 5 folds](URL_of_the_image)
+![mean WSS over 5 folds](https://github.com/Freya-MJ/Final-Project/blob/main/6.png)
 
 **WSS Plot:** The elbow plot for WSS shows a sharp decline as the number
 of clusters increases from 1 to 4, after which the decline in WSS slows
 down. This suggests that four clusters provide a reasonable balance
 between within-cluster variance and the number of clusters.
 
-![Number of clusters](URL_of_the_image)
+![Number of clusters](https://github.com/Freya-MJ/Final-Project/blob/main/7.png)
 
 **Silhouette Plot:** The silhouette plot supports the choice of four
 clusters, as the mean silhouette score starts to plateau after four
 clusters, indicating that additional clusters do not provide a
 significant structure improvement.
-
-![Importance Score(Ridge with Penalty)](URL_of_the_image)
+https://github.com/Freya-MJ/Final-Project/blob/main/8.pngURL_of_the_image)
 
 **Ridge Regression:** The bar chart shows that "death_numbers"" and
 "population"" have the highest importance scores in the Ridge Regression
 model, implying they are strong predictors of the outcome variable.
 
-![RMSE Across Ridge Regression Resamples](URL_of_the_image)
+![RMSE Across Ridge Regression Resamples](https://github.com/Freya-MJ/Final-Project/blob/main/9.png)
 
 **RMSE Across Ridge Regression Resamples:** The multi-line plot displays
 RMSE across different penalties for Ridge Regression. Lower penalties
 seem to yield lower RMSE, suggesting better model performance.
 
-![RMSE Across Random Forest Resamples](URL_of_the_image)
+![RMSE Across Random Forest Resamples](https://github.com/Freya-MJ/Final-Project/blob/main/10.png)
 
 **RMSE Across Random Forest Resamples:** The plot shows RMSE for
 different "mtry"" values in Random Forest, with some volatility across
 the folds. The optimal "mtry"" seems to be around the middle range,
 neither too low nor too high.
+
+![Importance](https://github.com/Freya-MJ/Final-Project/blob/main/11.png)
+
+**Variable Importance in Random Forest Model:** This chart reveals the influence of different variables in predicting drug-related deaths through a Random Forest regression model. Notably, 'land_area_sq_km' stands out as the variable with the highest importance score, suggesting a significant predictive impact. Other prominent variables include 'death_numbers' and 'total_area_sq_km'. These findings imply a strong association between the geographical attributes of a region and its drug mortality rates, although the reasons for such a correlation warrant further investigation.
+
+![Predict 2022 Death Rate by Region](https://github.com/Freya-MJ/Final-Project/blob/main/13.png)
+
+**Predicted 2022 Death Rate by Region:** The scatter plot visualizes predictions of death rates for 2022 across different US regions, using two machine learning models: Random Forest and Ridge Regression. Each point represents a state within a region, differentiated by symbols. The predictions by Random Forest are depicted in red circles, while Ridge Regression predictions are in blue dots. States in the Midwest are marked with dots, Northeast with triangles, South with squares, and West with crosses. The plot demonstrates variability in death rate predictions across states and regions, with some states predicted to experience higher death rates than others. The source of data is the CDC/National Center for Health Statistics. The number of deaths is per 100,000 of the total population, highlighting the importance of regional strategies in public health planning.
 
 **Data Analysis:** The chosen tools, including K-means clustering, Ridge
 Regression, and Random Forest, align with the complexity of drug-related
