@@ -364,7 +364,8 @@ models provide reasonable predictions, but they might perform
 differently on unseen data. Limitations include potential biases in the
 data and the static nature of models against evolving trends. Future
 research should focus on incorporating more dynamic data and exploring
-causal inference models.
+causal inference models. 
+Looking at our predicted results, a potential problem exists at the use of predictors in our Random Forest model. Through the vip command, we learned that total state area is the most important variable under random forest. However, one state’s total area remain fixed over time, relying on geographical size to predict drug death rate might be logically inappropriate. Based on our discussions, it is likely that this high weight on total area is because smaller states also tend to have clustering of population, therefore more likely to have drug overdoes problems. For future research, it may be meaningful to include a new coded variable that is population per square kilometer of state’s area. Using this new variable, we may be able to understand why total area is given so much weight in the random forest model.
 
 ## Conclusion
 
