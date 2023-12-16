@@ -241,7 +241,7 @@ visual representation of the models' outputs.
 #### Visual Analysis
 
 ![Aggregate National Distribution of State Drug Death in the US: 2015 -
-2021](https://github.com/Freya-MJ/Final-Project/blob/main/3.png)
+2021](https://github.com/Freya-MJ/Final-Project/blob/main/State%20Drug%20Death%20Trend%20Across%20Time.pdf)
 
 Analyzing the first image, a ridge plot showcases the distribution of
 drug deaths across states from 2015 to 2021. The peaks and valleys in
