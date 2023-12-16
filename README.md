@@ -312,7 +312,6 @@ between within-cluster variance and the number of clusters.
 clusters, as the mean silhouette score starts to plateau after four
 clusters, indicating that additional clusters do not provide a
 significant structure improvement.
-https://github.com/Freya-MJ/Final-Project/blob/main/8.pngURL_of_the_image)
 
 ![Number of clusters](https://github.com/Freya-MJ/Final-Project/blob/main/8.png)
 **Ridge Regression:** The bar chart shows that "death_numbers"" and
