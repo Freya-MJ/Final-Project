@@ -1,0 +1,884 @@
+---
+title: "Data Science for Public Policy"
+subtitle: "Final Project"
+author: "Zehui Li, Lezhi Cao, Mujin Li, Xinwen Zhang"
+execute:
+  warning: false
+format:
+  html:
+    embed-resources: true
+editor: visual
+---
+
+## Data Description and Clean
+
+In this project, we compiled data from various sources spanning the years 2015 to 2022, encompassing a wide array of indicators for each state. These indicators include poverty rates, population figures, median income levels, high school graduation numbers, land area, water area, and unemployment rates. To procure this diverse dataset, we employed a combination of methods, including direct web downloads and API access.
+
+Given the heterogeneous formats of data from different sources, our data cleaning process was crucial. We harnessed tools like `pivot_longer` and `columnnames` to standardize the data format, making it amenable for merging and subsequent cleaning operations.
+
+After an initial examination of the data, we systematically addressed missing values by either removing variables with significant data gaps or imputing missing values with zeros. This rigorous data preparation phase ensured the integrity and consistency of our dataset, setting the stage for robust analysis and insights.
+
+Reference: [Overdose Death: CDC/National Center for Health Statistics](https://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm) [Poverty: United States Census Bureau](https://www.census.gov/library/publications/2023/demo/p60-280.html) [Area: World Population Review](https://worldpopulationreview.com/state-rankings/states-by-area) [Population: United States Census Bureau](https://www.census.gov/popclock/) [GDP: United States Census Bureau](https://data.census.gov/) [High Scool Graduation Number : United States Census Bureau](https://data.census.gov/) [Unemployment Rate : United States Census Bureau](https://data.census.gov/)
+
+#### Load the Package
+
+```{r}
+library(tidyverse)
+library(tidycensus)
+library(readxl)
+
+```
+
+#### Merge the data set
+
+```{r}
+# read all the dataset
+poverty_fp <- read_csv("/Users/macbookpro/Desktop/finalproj/Final-Project/mjdata/poverty.csv")
+unemployment_fp <- read_xlsx("/Users/macbookpro/Desktop/finalproj/Final-Project/mjdata/unemploymentrateus2015-2022.xlsx")
+gdp_fp <- read_xlsx("/Users/macbookpro/Desktop/finalproj/Final-Project/mjdata/GDP.xlsx")
+population_fp <- read_xlsx("/Users/macbookpro/Desktop/finalproj/Final-Project/mjdata/Population.xlsx")
+area_fp <- read_xlsx("/Users/macbookpro/Desktop/finalproj/Final-Project/mjdata/state_area.xlsx")
+income_fp <- read_xlsx("/Users/macbookpro/Desktop/finalproj/Final-Project/mjdata/income2015-2022.xlsx")
+overdose_fp <- read_excel("/Users/macbookpro/Desktop/finalproj/Final-Project/mjdata/overdose_mortality_rate.xlsx")
+
+## Using api retrive data of high school graduation numbers in Census Bureau from 2015-2022
+### Run this Part in your console: delete the 
+### census_api_key("YOUR_API_KEY", install = TRUE, overwrite = TRUE)
+credential <- Sys.getenv("census_api_key")
+
+### get every years data using the fuction
+years <- c(2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022)
+all_edu_data <- list()  # store in the list
+for (year in years) {
+  edu_data <- get_acs(geography = "state",
+                      variable = c(high_school_grad_number = "B06009_003"),
+                      year = year)
+  edu_data$year <- year
+  all_edu_data[[as.character(year)]] <- edu_data  
+}
+edu_fp <- bind_rows(all_edu_data)
+edu_fp<- edu_fp%>%select(-moe,-variable)
+colnames(edu_fp)[3] = "high_school_grad_number"
+colnames(edu_fp)[2] = "state"
+edu_fp <-edu_fp[-1]
+```
+
+```{r}
+# merge the table one-by-one
+## poverty and unemployment rate
+unemployment_long <- unemployment_fp %>% pivot_longer(cols = -1, 
+               names_to = "year", 
+               values_to = "unemployment_rate")
+pov_unemploy <- merge(poverty_fp, unemployment_long, by.x = c("year", "name"), by.y = c("year", "State"), all = TRUE)
+
+## poverty, unemployment rate, GDP
+colnames(gdp_fp)[1] = "state"
+gdp_long <- gdp_fp %>% pivot_longer(cols = -1, 
+               names_to = "year", 
+               values_to = "gdp")
+pov_unemploy_gdp <- merge(pov_unemploy, gdp_long, by.x = c("year", "name"), by.y = c("year", "state"), all = TRUE)
+
+## poverty, unemployment rate, GDP, population
+colnames(population_fp)[1]="state"
+colnames(population_fp)[2:9]<-2015:2022
+population_fp <-population_fp[-1,]
+population_fp$state <- sub("^\\.", "", population_fp$state)
+population_long <- population_fp %>% pivot_longer(cols = -1, 
+               names_to = "year", 
+               values_to = "population")
+pov_unemploy_gdp_pop <- merge(pov_unemploy_gdp, population_long, by.x = c("year", "name"), by.y = c("year", "state"), all = TRUE)
+
+## poverty, unemployment rate, GDP, population, income
+income_long <- income_fp %>% pivot_longer(cols = -1, 
+               names_to = "year", 
+               values_to = "income")
+pov_unemploy_gdp_pop_income <- merge(pov_unemploy_gdp_pop, income_long, by.x = c("year", "name"), by.y = c("year", "state"), all = TRUE)
+
+## poverty, unemployment rate, GDP, population, income, area
+area_fp2 <- area_fp %>%
+  select(state,total_area_sq_km,land_area_sq_km,water_area_sq_km)
+pov_unemploy_gdp_pop_income_area <-pov_unemploy_gdp_pop_income%>%
+  left_join(area_fp2, by = c("name" = "state"))
+
+## poverty, unemployment rate, GDP, population, income, area, high school graduation numbers
+pov_unemploy_gdp_pop_income_area_edu <- merge(pov_unemploy_gdp_pop_income_area, edu_fp, by.x = c("year", "name"), by.y = c("year", "state"), all = TRUE)
+
+## poverty, unemployment rate, GDP, population, income, area, high school graduation numbers, overdose
+
+overdose_fp2 <- overdose_fp %>% filter(year>=2015)
+
+# we find the overdose rate data only have state abbreviarion, we need to add the state full name in to this dataset
+state <- data.frame(
+  State = c(
+    "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut",
+    "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
+    "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan",
+    "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+    "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma",
+    "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
+    "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming","Distric of Columbia"
+  ),
+  stateid = c(
+    "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA",
+    "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT",
+    "VA", "WA", "WV", "WI", "WY","DC"
+  )
+)
+overdose_fp3 <-overdose_fp2%>%
+  left_join(state, by = c("state" = "stateid"))
+overdose_fp3 <-overdose_fp3[-2]
+all_data <- merge(pov_unemploy_gdp_pop_income_area_edu, overdose_fp3, by.x = c("year", "name"), by.y = c("year", "State"), all = TRUE)
+
+```
+
+```{r}
+# clean the data
+## drop the useless or have to much missing value data
+all_data2 <-all_data[-3]
+all_data3 <-all_data2[-3]
+all_data4 <- all_data3[complete.cases(all_data3$income), ]
+## After checking, we find the dataset missing the data in the poverty rate in 2022
+poverty_2022 <- read_xlsx("/Users/macbookpro/Desktop/finalproj/Final-Project/mjdata/povertyrate2022.xlsx")
+poverty_2022 <- poverty_2022 %>%
+  mutate(year = as.character(year))
+data_clean_initial <- all_data4 %>%
+  left_join(poverty_2022, by = c("name" = "state", "year")) %>%
+  mutate(percent_in_poverty = coalesce(percent_in_poverty.x, percent_in_poverty.y)) %>%
+  select(-percent_in_poverty.x, -percent_in_poverty.y)
+
+write.csv(data_clean_initial, file = "/Users/macbookpro/Desktop/finalproj/Final-Project/mjdata/data_clean_mj.csv")
+```
+
+# Explotary Data Analysis
+
+```{r}
+data <- data_clean_initial
+selected_states <- c("West Virginia", "Ohio", "Delaware", "Maryland")
+filtered_data <- data[data$name %in% selected_states, ]
+filtered_data$year <- as.numeric(filtered_data$year)
+plot_comparison <- ggplot(filtered_data, aes(x = year, y = death_rate)) +
+  geom_line(size = 0.8) +
+  facet_wrap(~name, ncol = 2) + 
+  labs(x = "Year", 
+       y = "Death Rate", 
+       title = "Death Rate Trends for 4 Selected States from 2015 to 2021",
+       subtitle = "The death rate means number of deaths per 100,000 total population.",
+      caption = "CDC/National Center for Health Statistics") +
+  theme_minimal()
+plot_comparison
+```
+
+#### library packages
+
+```{r}
+
+library(tidyverse)
+library(lubridate)
+library(tidymodels)
+library(themis)
+library(recipes)
+library(parsnip)
+library(ranger)
+library(ggplot2)
+library(vip)
+library(patchwork)
+library(stringr)
+library(tidyclust)
+library(tidymodels)
+library(Rfast)
+library(viridis)
+library(readxl)
+```
+
+```{r}
+library(readr)
+library(readxl)
+library(tidyverse)
+library(tidytext)
+library(lubridate)
+library(SnowballC)
+library(igraph)
+library(ggraph)
+library(tm)
+library(stopwords)
+library(textrecipes)
+library(rsample)
+library(tidymodels)
+library(ggplot2)
+library(sf)
+library(gridExtra)
+library(ggridges)
+```
+
+### Drug Death Analysis
+
+```{r}
+drug_clean <-read_csv("/Users/macbookpro/Desktop/finalproj/Final-Project/data_clean.csv")
+location <- st_read("/Users/macbookpro/Desktop/finalproj/Final-Project/mjdata/us-states.json")
+
+#filter the data into cumulative drug death by state and per capita death, using average values, for 2015 to 2022
+year_cumulative <-drug_clean %>%
+  filter(year<=2021)%>%
+  mutate(death_capita = death_numbers / population)%>%
+  group_by(abbreviation)%>%
+  summarize (death_numbers = sum(death_numbers,na.rm = T),
+             average_death_capita = mean(death_capita, na.rm = T))
+
+drug_death_geospatial <- merge(location, year_cumulative, by.x = "id", by.y = "abbreviation")
+
+
+#Cumulative Gun Deaths Across States Visualization
+plot1 <- ggplot(data = drug_death_geospatial) +
+  geom_sf(aes(fill = death_numbers)) +
+  scale_fill_continuous(
+    low = "lightyellow", 
+    high = "orange", 
+    name = "Total Deaths",
+    breaks = c(10000, 20000, 40000),
+    labels = c("10K", "20K", "40K") 
+  ) +
+  labs(title = "Cumulative Drug Deaths and Drug Death per Capita for Different States in the US: 2015-2021", 
+       subtitle = "California and Florida have the highest cumulative drug deaths; West Virginia has the highest drug death per capita.") +
+  theme_void()+  
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 4), 
+    legend.title = element_text(size = 5),
+    legend.key.size = unit(0.2, "cm"),
+    plot.title = element_text(face = "bold", size = 7), 
+    plot.subtitle = element_text(size = 6)
+  )  
+
+ #per capita death visualization
+plot2 <- ggplot(data = drug_death_geospatial) +
+   geom_sf(aes(fill = average_death_capita)) +
+   scale_fill_continuous(
+     low = "lightblue", 
+     high = "darkblue", 
+     name = "Death per Capita",
+     breaks = c(0.0001,0.00030,0.00056),
+     labels = c("1e-04", "3e-04", "5.6e-04")
+   ) +
+   labs(caption = "Data Source: Center for Diseases Control and Prevention") +
+   theme_void() +  
+   theme(
+     legend.position = "bottom",
+     legend.text = element_text( size = 4), 
+     legend.title = element_text(size = 5),
+     legend.key.size = unit(0.2, "cm"),
+     plot.caption = element_text(size = 3, hjust = 0.50)
+   )
+
+combined_plot <- grid.arrange(plot1, plot2, ncol = 1)
+
+#let's look at the death number over the years for different states
+drug_2021 <-
+  drug_clean %>%
+  filter(year == 2021)%>%
+  arrange(desc(death_numbers))
+
+ drug_clean %>%
+  filter(year<=2021)%>%
+  ggplot()+
+  geom_rect(aes(xmin=2017,
+                xmax=2019,
+                ymin=0,
+                ymax=12000),
+            alpha = 0.03, fill = "orange")+
+  geom_line(aes(x=year,
+                y=death_numbers,
+                group=abbreviation),
+            size = 1,
+            color = "grey60",
+            alpha = 0.5)+
+  geom_point(aes(x=year, 
+                y=death_numbers,
+                group=abbreviation),
+            color = "darkgrey",
+            size =1,
+            alpha = 0.6)+
+  geom_text(data = head(drug_2021, n = 3),
+            aes(x = year, y = death_numbers, label = name),
+            color = "black",
+            size = 3,
+            hjust = 0.8,
+            vjust = -0.8) +
+  guides(colour = guide_legend(override.aes = list(alpha = 0)))+
+  scale_y_continuous(breaks = seq(0, 12000, by = 4000),
+                     labels = seq(0, 12000, by = 4000))+
+  scale_x_continuous(breaks = seq(2015, 2021, by = 2),
+                     labels = seq(2015, 2021, by = 2))+
+  labs(title = "Yearly Drug Death for all States in the US: 2015 - 2021",
+       subtitle = "Major drug death fluctuations took place during 2017 to 2019, with initial decrease followed by a continued increase",
+       y = "Drug Death",
+       caption = "Data source: Center for Diseases Control and Prevention") +
+  theme_minimal() + 
+  theme(plot.title = element_text(face = "bold", size = 16),
+        plot.caption = element_text(hjust = 1),
+        axis.title = element_text(size = 11),
+        axis.text = element_text(size = 10),
+        axis.title.x = element_blank())
+
+```
+
+```{r}
+#yearly drug death distribution visualization
+ drug_clean %>%
+  filter(year<2022)%>%
+ggplot(aes(x = death_numbers,
+                            y = factor(year, levels = c("2015", "2016", "2017", "2018", "2019", "2020", "2021")),
+                            fill = factor(after_stat(quantile)))) +
+  stat_density_ridges(
+    geom = "density_ridges_gradient", calc_ecdf = TRUE,
+    quantiles = 4, quantile_lines = TRUE, scale = 2
+  ) +
+  scale_fill_manual(values = c("1" = "lightyellow", "2" = "khaki",
+                               "3" = "darkkhaki", "4" = "brown"),
+                    name = "Drug Death \nQuartiles") +
+scale_x_continuous(breaks = seq(0, 9000, 2000),
+                   labels = seq(0, 9000,2000)) +
+  labs(title = "Aggregate National Distribution of State Drug Death in the US: 2015 - 2021",
+       subtitle = "On Average, State Drug Death decreased slightly in 2018, increased significantly starting from 2020; \nIn 2021, state drug death polarization seemed to take place.",
+       caption = "Data: Center for Diseases Control and Prevention")+
+  xlab("Drug Death")+
+  theme_minimal()+
+  theme(axis.title.x = element_text(size = 11, vjust = -0.5),
+        axis.title.y = element_blank(),
+        axis.text.x = element_text(angle = 45, vjust = 1.1, hjust = 1, size = 10),
+        axis.text.y = element_text(size = 10),
+        plot.title = element_text(face = "bold", size = 16),
+        plot.subtitle = element_text(size = 12),
+        plot.caption = element_text(hjust = 1),
+        )
+
+ predict<- read_csv("/Users/macbookpro/Desktop/finalproj/Final-Project/predict_compare.csv")
+ predict_geospatial <- merge(location, predict, by.x = "name", by.y = "name")
+ 
+plot3 <- predict_geospatial%>%
+  ggplot() +
+   geom_sf(aes(fill = Ridge)) +
+  scale_fill_continuous(
+     low = "#FFD1DC", 
+     high = "darkred",
+     name = "Death Rate",
+     breaks = c(13,17,22),
+     labels = c("13", "17", "22"))+ 
+  labs(title = "Predicted Drug Death Rates for Different States in the US", 
+       subtitle = "Predictions from Ridge Regression") +
+  theme_void()+  
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 4), 
+    legend.title = element_text(size = 5),
+    legend.key.size = unit(0.2, "cm"),
+    plot.title = element_text(face = "bold", size = 7), 
+    plot.subtitle = element_text(size = 6)
+  )  
+ 
+plot4<- predict_geospatial%>%
+  ggplot() +
+  geom_sf(aes(fill = `Random Forest`)) +
+  scale_fill_continuous(
+    low = "#FFD1DC", 
+    high = "darkred",
+    name = "Death Rate", 
+    breaks = c(-28,0,33),
+    labels = c("-28","0", "33"))+ 
+  labs(
+    subtitle = "Predictions from Random Forest",
+    caption="Data Source: Center for Diseases Control and Prevention") +
+  theme_void()+  
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 4), 
+    legend.title = element_text(size = 5),
+    legend.key.size = unit(0.2, "cm"),
+    plot.caption = element_text(size = 3, hjust = 0.50),
+    plot.subtitle = element_text(size = 6)
+    
+  )  
+combined_plot2 <- grid.arrange(plot3, plot4, ncol=1)
+
+             
+```
+
+## Machine learning
+
+### data preparation
+
+```{r}
+data<-read_csv("/Users/macbookpro/Desktop/finalproj/Final-Project/data_finalproject.csv")
+
+povertynew<-read_excel("/Users/macbookpro/Desktop/finalproj/Final-Project/povertyrate.xlsx")
+
+povertynew<-povertynew%>%
+  pivot_longer(!name,
+               names_to = "year",
+               values_to = "poverty")
+
+povertynew <- povertynew %>% 
+  mutate(year = as.double(year))%>%
+  rename("povertyrate"="poverty")
+
+povertyold<-data%>%
+   select("name","year","percent_in_poverty")%>%
+  rename("povertyrate"="percent_in_poverty")
+
+povertyold<-povertyold%>%
+  filter(year<2019)
+
+poverty<-bind_rows(povertynew,povertyold,id=NULL)
+
+data_clean<-left_join(data,poverty,by=c("name","year"))
+
+hs<-read_csv("/Users/macbookpro/Desktop/finalproj/Final-Project/hs.csv")%>%
+  select(-1,-2)%>%
+  rename("name"="state")
+
+data_clean<-left_join(data_clean,hs,by=c("name","year"))
+
+data_clean<-data_clean%>%
+  select(-"percent_in_poverty",-"data_totals_violent_all",-"data_totals_property_all",-"number_in_poverty")
+
+data_clean%>%
+  group_by(name)%>%
+  summarise(missing_values = sum(is.na(poverty)))
+
+data_clean <- data_clean %>%
+  mutate_all(~ replace(., is.na(.), 0))
+
+data_clean<-data_clean%>%
+  select(-1)
+
+implement<-data_clean%>%
+  filter(year>2021)
+
+data_clean<-data_clean%>%
+  filter(year<2022)
+
+write.csv(data_clean, file = "data_clean1.csv", row.names = FALSE)
+```
+
+### Unsupervised machine learning: Kmeans
+
+```{r}
+#resample
+set.seed(1214)
+kmeans_cv <- vfold_cv(data_clean, v = 3)
+```
+
+#### Build the model
+
+```{r}
+# Create the recipe
+kmeans_rec<-recipe(~., data = data_clean)%>%
+  update_role(name,abbreviation,new_role = "ID")%>%
+  step_dummy(all_nominal_predictors())%>%
+  step_normalize(all_predictors())%>%
+  step_pca(all_numeric(), threshold = .90)%>%
+  prep()
+
+kmeans<-bake(kmeans_rec, new_data = data_clean)
+# build the model
+kmeans_spec <- k_means(
+  num_clusters = tune()
+) %>%
+  set_engine(
+    "stats",
+    nstart = 100 
+  )
+#Create the workflow
+kmeans_wflow <- workflow(
+  preprocessor = kmeans_rec,
+  spec = kmeans_spec
+)
+
+# Create the grid for tuning
+clust_num_grid <- grid_regular(
+  num_clusters(), 
+  levels = 10
+)
+# tune the k-means clustering algorithm
+res <- tune_cluster(
+  object = kmeans_wflow,
+  resamples = kmeans_cv,
+  grid = clust_num_grid,
+  control = control_grid(save_pred = TRUE),
+  metrics = cluster_metric_set(sse_within_total,silhouette_avg)
+)
+```
+
+#### Evaluate the Model
+
+```{r}
+wss<-res%>%
+  collect_metrics() %>%
+  filter(.metric == "sse_within_total")
+wss
+
+silhouette<-res%>%
+  collect_metrics() %>%
+  filter(.metric == "silhouette_avg")
+silhouette
+
+# select by plot
+wss_plot<-res %>%
+  collect_metrics() %>%
+  filter(.metric == "sse_within_total") %>%
+  ggplot(aes(x = num_clusters, y = mean)) +
+  geom_point() + 
+  geom_line() + 
+  scale_x_continuous(breaks = 1:10) +
+  labs(
+    x = "Number of clusters",
+    y = "mean WSS over 5 folds"
+  ) +
+  theme_minimal() 
+wss_plot
+silhouette<-res%>%
+  collect_metrics() %>%
+  filter(.metric == "silhouette_avg") %>%
+  ggplot(aes(x = num_clusters, y = mean)) +
+  geom_point() + 
+  geom_line() + 
+  scale_x_continuous(breaks = 1:10) +
+  labs(
+    x = "Number of clusters",
+    y = "mean silhouette_avg over 5 folds"
+  ) +
+  theme_minimal() 
+silhouette
+#optimal cluster for wss is 4 and for silhouette is 4
+```
+
+#### Model Viz
+
+```{r}
+kmean_plot<-bake(kmeans_rec,new_data = data_clean)%>%
+  select("PC1","PC2")
+
+kmeans_spec_final <- k_means(
+  num_clusters = 4 # number of clusters
+) %>%
+  set_engine(
+    "stats",
+    nstart = 100 # number of random starts
+  )
+
+# create the final workflow
+kmeans_wflow_final <- workflow(
+  preprocessor =kmeans_rec,
+  spec = kmeans_spec_final
+)
+
+# fit the final model
+final_fit <- fit(
+  kmeans_wflow_final,
+  data = data_clean
+)
+
+tidy(final_fit)
+
+clusters <- bind_cols(
+  final_fit %>%
+    extract_recipe() %>%
+    bake(data_clean),
+  cluster = final_fit %>%
+    extract_cluster_assignment() %>%
+    pull(.cluster)
+)
+cluster_plot <- ggplot() +
+  geom_point(data = clusters, mapping = aes(x = PC1, y = PC2,color = factor(cluster)))+
+  labs(title = "K-Means with K = 4 and PCA")+ 
+  # use paste to dynamically include the value of k in the title
+  theme_minimal()
+
+cluster_plot
+```
+
+### Supervised machine learning
+
+#### linear regression: ridge
+
+```{r}
+#plit the data into training and testing sets 
+set.seed(12143)
+split<-initial_split(data_clean, 
+  prop = 0.7, 
+  strata = "death_rate"
+)
+train <- training(split)
+test <- testing(split)
+```
+
+```{r}
+#resample
+set.seed(1234)
+folds <- vfold_cv(data = train, v = 5)
+```
+
+##### Build the model
+
+```{r}
+# create a recipe
+ridge_rec <- 
+  recipe(death_rate ~ ., data = data_clean) %>%
+  update_role(name,abbreviation,new_role = "ID")%>%
+  # drop near zero variance predictors
+  step_nzv(all_predictors()) %>%
+  # center and scale predictors
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors())%>%
+  prep()
+```
+
+```{r}
+# create a tuning grid for ridge regularization, varying the regularization penalty
+ridge_grid <- grid_regular(penalty(), levels = 10)
+
+# create a linear_regression model with tuned the penalty parameter
+ridge_mod <- linear_reg(
+  penalty = tune(), 
+  mixture = 1
+) %>%
+  set_engine("glmnet")
+
+# create a ridge workflow 
+ridge_wf <- workflow() %>%
+  add_recipe(ridge_rec) %>%
+  add_model(ridge_mod)
+
+# perform hyperparameter tuning using the on ridge hyperparameter grid and cross_validation folds 
+ridge_cv <- ridge_wf %>%
+  tune_grid(
+    resamples = folds,
+    grid = ridge_grid,
+    control = control_grid(save_pred = TRUE),
+            metrics = metric_set(rmse)
+  )
+
+# select the best model based on the "rmse" metric
+ridge_best <- ridge_cv %>%
+  select_best(metric = "rmse")
+
+# fit the final ridge model to the full training data and extract coefficients
+ridge_final <- finalize_workflow(
+  ridge_wf,
+  parameters = ridge_best
+)
+# by updating the line below
+ridge_coefs <- ridge_final %>%
+  fit(data = train) %>%
+  extract_fit_parsnip() %>%
+  vi(lambda = ridge_best$penalty) 
+# colculate the importance score
+ridge_importance<-ggplot(data=ridge_coefs)+
+  geom_bar(aes(x=reorder(Variable, Importance),y = Importance),stat = "identity")+
+  coord_flip()+
+  labs(title = "Importance Score(Ridge with Penalty)", x = "Variable", y = "Important Score")+
+  theme_minimal()
+ridge_importance
+```
+
+##### Evaluate the model
+
+```{r}
+# plot the visulization of penalty and rmse
+ridge_rmse<-
+  collect_metrics(ridge_cv, summarize = FALSE) %>% 
+  filter(.metric == "rmse") 
+
+ridge_rmse_plot <-ggplot(ridge_rmse, aes(x = penalty, y = .estimate,color = id)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "RMSE Across Ridge Regression Resamples",
+       x = "Penalty",
+       y = "RMSE") +
+  theme_minimal()
+
+ridge_rmse_plot
+```
+
+##### Out of Sample Rate & Predict Result
+
+```{r}
+# use best model make predictions with test dataset
+ridge_best_test <- finalize_workflow(
+  ridge_wf,
+  parameters = ridge_best
+)
+ridge_best_test_fit<-ridge_best_test%>%
+  fit(data = train) # use original train dataset
+
+ridge_prediction <- ridge_best_test_fit%>%
+  predict(new_data = test) #use test dataset
+
+ridge_rmse_test <- bind_cols(test %>% select(death_rate),  
+                       ridge_prediction %>% select(.pred)
+                       )%>% #combine the true value from test dataset and the predicted value
+  rmse(truth = death_rate, estimate = .pred)
+ridge_rmse_test
+ridge_predict2022 <- ridge_best_test_fit%>%
+  predict(new_data = implement)
+ridge_predict2022
+```
+
+#### Random Forest
+
+##### Build the model
+
+```{r}
+rf_mod <- 
+  rand_forest(mtry = tune(), min_n = tune(), trees = 500) %>% 
+  set_engine("ranger",num.threads = 10) %>% 
+  set_mode("regression")
+#create the workflow
+rf_wf <- 
+  workflow() %>% 
+  add_model(rf_mod) %>% 
+  add_recipe(ridge_rec)
+```
+
+##### Evaluate the model: RMSE & out of sample rate
+
+```{r}
+# train and tune the model
+set.seed(345)
+rf_res <- 
+  rf_wf %>% 
+  tune_grid(folds,
+            grid = 5,
+            control = control_grid(save_pred = TRUE),
+            metrics = metric_set(rmse))
+# find the best mtry&min_n value
+rf_res %>% 
+  show_best(metric = "rmse")
+
+# plot the visulization of mtry and rmse
+rf_rmse<-
+  collect_metrics(rf_res, summarize = FALSE) %>% 
+  filter(.metric == "rmse") 
+
+rf_rmse_plot <-ggplot(rf_rmse, aes(x = mtry, y = .estimate,color = id)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "RMSE Across Random Forest Resamples",
+       x = "mtry",
+       y = "RMSE") +
+  theme_minimal()
+
+rf_rmse_plot 
+#select my best random forest model
+rf_best<-rf_res%>%
+  select_best(metric = "rmse")
+rf_best
+# use best model make predictions with test dataset
+rf_best_test <- finalize_workflow(
+  rf_wf,
+  parameters = rf_best
+)
+rf_best_test_fit<-rf_best_test%>%
+  fit(data = train) # use original train dataset
+test_prediction <- rf_best_test_fit%>%
+  predict(new_data = test) #use test dataset
+
+rmse_test <- bind_cols(test %>% select(death_rate),  
+                       test_prediction %>% select(.pred)
+                       )%>% #combine the true value from test dataset and the predicted value
+  rmse(truth = death_rate, estimate = .pred)
+rmse_test
+```
+
+```{r}
+best_rf_mod <- 
+  rand_forest(mtry = 7, min_n = 6, trees = 500) %>% 
+  set_engine("ranger",importance = "impurity") %>% 
+  set_mode("regression")
+
+# the last workflow
+best_rf_wf <- 
+  rf_wf %>% 
+  update_model(best_rf_mod)
+
+# the last fit
+set.seed(345)
+best_rf_fit <- best_rf_wf %>% 
+  last_fit(split)
+
+best_rf_fit
+
+best_rf_fit %>% 
+  extract_fit_parsnip() %>% 
+  vip()
+```
+
+##### predict result
+
+```{r}
+predict2022 <- rf_best_test_fit%>%
+  predict(new_data = implement)
+predict2022$.pred
+```
+
+#### Model compare
+
+```{r}
+predict_compare<-bind_cols(predict2022,ridge_predict2022)
+
+name <- data_clean %>%
+  distinct(name) %>%
+  arrange(row_number())
+
+predict_compare<-bind_cols(name,predict_compare)
+
+colnames(predict_compare)[2] <- "Ridge"
+
+colnames(predict_compare)[3] <- "Random Forest"
+  
+predict_compare_long<-predict_compare%>%
+  pivot_longer(!name,
+               names_to = "model",values_to = "prediction")
+
+write.csv(predict_compare, file="predict_compare.csv", row.names = FALSE)
+
+states_data <- tibble(
+  state = c("Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", 
+            "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", 
+            "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", 
+            "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", 
+            "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", 
+            "West Virginia", "Wisconsin", "Wyoming", "District of Columbia"),
+  region = c("South", "West", "West", "South", "West", "West", "Northeast", "South", "South", "South", 
+             "West", "West", "Midwest", "Midwest", "Midwest", "Midwest", "South", "South", "Northeast", "South", 
+             "Northeast", "Midwest", "Midwest", "South", "Midwest", "West", "Midwest", "West", "Northeast", "Northeast", 
+             "Northeast", "West", "Northeast", "South", "Midwest", "Midwest", "West", "Northeast", "South", "West", 
+             "Northeast", "South", "Midwest", "South", "West", "Northeast", "South", "West", "South", "Midwest", "West")
+)
+```
+
+```{r}
+
+states_data<-states_data%>%
+  rename("name"="state")
+
+outcome<-left_join(predict_compare_long,states_data,by ="name")
+
+abbreviate<-data_clean%>%
+  select("abbreviation","name")
+
+outcome<-left_join(outcome,abbreviate,by="name")
+
+outcome_plot<-ggplot(data = outcome)+
+   geom_point(aes(x=abbreviation,y=prediction,color = model, shape = region),
+    size = 1.5, 
+    alpha = 0.8,na.rm = TRUE)+
+    facet_wrap(~ region,scales = "free_x")+
+   labs(title ="Predict 2022 Death Rate by Region", x= "State",y="Prediction",subtitle = "Source: CDC/National Center for Health Statistics",caption = "The number of deaths per 100,000 total population.")+
+   theme_minimal()+
+   theme(axis.text.x = element_text(size = 5),
+        strip.text.x = element_text(size = 10,face="bold"),
+        plot.background = element_rect(color = "#fef6e4"),
+        plot.title = element_text(face = "bold"))
+outcome_plot
+```
