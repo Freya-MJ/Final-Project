@@ -308,6 +308,7 @@ down. This suggests that four clusters provide a reasonable balance
 between within-cluster variance and the number of clusters.
 
 ![mean WSS over 5 folds](https://github.com/Freya-MJ/Final-Project/blob/main/6.png)
+
 **Silhouette Plot:** The silhouette plot supports the choice of four
 clusters, as the mean silhouette score starts to plateau after four
 clusters, indicating that additional clusters do not provide a
