@@ -312,7 +312,7 @@ influencing drug mortality rates. These limitations highlight the need
 for continuous data updates and more sophisticated models that can adapt
 to evolving societal dynamics.
 
-## Project Instructions
+## Instructions
 
 #### Setting Up the Environment
 1.  Install R and RStudio.
