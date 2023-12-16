@@ -156,17 +156,14 @@ or imputing missing values with zeros. This rigorous data preparation
 phase ensured the integrity and consistency of our dataset, setting the
 stage for robust analysis and insights.
 
-Reference: [Overdose Death: CDC/National Center for Health
-Statistics](https://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm)
-[Poverty: United States Census
-Bureau](https://www.census.gov/library/publications/2023/demo/p60-280.html)
-[Area: World Population
-Review](https://worldpopulationreview.com/state-rankings/states-by-area)
-[Population: United States Census
-Bureau](https://www.census.gov/popclock/) [GDP: United States Census
-Bureau](https://data.census.gov/) [High Scool Graduation Number : United
-States Census Bureau](https://data.census.gov/) [Unemployment Rate :
-United States Census Bureau](https://data.census.gov/)
+Reference: 
+[Overdose Death: CDC/National Center for Health Statistics](https://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm)
+[Poverty: United States Census Bureau](https://www.census.gov/library/publications/2023/demo/p60-280.html)
+[Area: World Population Review](https://worldpopulationreview.com/state-rankings/states-by-area)
+[Population: United States Census Bureau](https://www.census.gov/popclock/) 
+[GDP: United States Census Bureau](https://data.census.gov/) 
+[High Scool Graduation Number : United States Census Bureau](https://data.census.gov/) 
+[Unemployment Rate : United States Census Bureau](https://data.census.gov/)
 
 ## Part 2. Drug Death Analysis
 
