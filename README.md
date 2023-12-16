@@ -24,6 +24,12 @@ the complex drug crisis landscape.
 2.  Use `install.packages()` to install required libraries listed at the
     beginning of the script.
 
+#### API Keys
+
+For data retrieval, you may need to apply for API keys from sources like
+the United States Census Bureau. Store these keys securely and use them
+to access relevant datasets.
+
 #### Data Acquisition
 
 1.  Download datasets from the provided links or use APIs to retrieve
@@ -63,6 +69,45 @@ Datasets encompassing poverty rates, unemployment figures, GDP,
 population, area, income levels, and high school graduation rates were
 meticulously cleaned and merged. Additional data were retrieved using
 Census Bureau APIs, ensuring a rich dataset for analysis.
+
+**Data Description and Clean**
+
+In this project, we compiled data from various sources spanning the
+years 2015 to 2022, encompassing a wide array of indicators for each
+state. These indicators include poverty rates, population figures,
+median income levels, high school graduation numbers, land area, water
+area, and unemployment rates.
+
+To procure this diverse dataset, we employed a combination of methods,
+including direct web downloads and API access.
+
+Given the heterogeneous formats of data from different sources, our data
+cleaning process was crucial. We harnessed tools like \`pivot_longer\`
+and \`columnnames\` to standardize the data format, making it amenable
+for merging and subsequent cleaning operations.
+
+After an initial examination of the data, we systematically addressed
+missing values by either removing variables with significant data gaps
+or imputing missing values with zeros.
+
+This rigorous data preparation phase ensured the integrity and
+consistency of our dataset, setting the stage for robust analysis and
+insights.
+
+Reference: [Overdose Death: CDC/National Center for Health
+Statistics](%5Bhttps://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm)](<https://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm>))
+[Poverty: United States Census
+Bureau](%5Bhttps://www.census.gov/library/publications/2023/demo/p60-280.html)](<https://www.census.gov/library/publications/2023/demo/p60-280.html>))
+[Area: World Population
+Review](%5Bhttps://worldpopulationreview.com/state-rankings/states-by-area)](<https://worldpopulationreview.com/state-rankings/states-by-area>))
+[Population: United States Census
+Bureau](%5Bhttps://www.census.gov/popclock/)](<https://www.census.gov/popclock/>))
+[GDP: United States Census
+Bureau](%5Bhttps://data.census.gov/)](<https://data.census.gov/>)) [High
+Scool Graduation Number : United States Census
+Bureau](%5Bhttps://data.census.gov/)](<https://data.census.gov/>))
+[Unemployment Rate : United States Census
+Bureau](%5Bhttps://data.census.gov/)](<https://data.census.gov/>))
 
 #### Geospatial Analysis
 
@@ -322,15 +367,19 @@ causal inference models.
 
 ## Conclusion
 
-Our project's findings paint a clear picture: drug-related deaths in the
-US are not just numbers but reflect deeper societal issues. Through data
-analysis, we've seen how factors like education, income, and location
-are intertwined with these tragedies. Our models offer a way to predict
-where the problem might hit hardest next. They're tools for those in
-charge to take action, to focus on places and people at greatest risk.
-It's a call to look beyond the data, to real lives, and to use this
-knowledge to save them. Looking ahead, we hope our work inspires more
-up-to-date research and real-time solutions.
+Our project's in-depth analysis paints a comprehensive picture of
+drug-related deaths in the US, weaving together societal issues like
+education and income. We discovered an intriguing aspect in our Random
+Forest model: state area emerged as a key predictor, suggesting a
+nuanced relationship between geographical size and drug overdose rates.
+This implies that smaller, densely populated states might face higher
+risks. Recognizing this, we propose including a measure of population
+density in future research to better understand this dynamic. Overall,
+our findings highlight the critical need for targeted, data-informed
+interventions, emphasizing the importance of real-life implications
+beyond statistical models. This project is a call to action, advocating
+for up-to-date research and solutions that resonate with the realities
+of those most affected by the drug crisis.
 
 ## limitation
 
@@ -365,3 +414,4 @@ to evolving societal dynamics.
     (2019). Fentanyl and fentanyl-analog involvement in drug-related
     deaths. Drug and Alcohol Dependence, 196, 1-8.
     <https://doi.org/10.1016/j.drugalcdep.2018.12.004>
+
