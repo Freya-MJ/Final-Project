@@ -4,6 +4,17 @@
 
 **Team members**: Zehui Li, Lezhi Cao, Mujin Li, Xinwen Zhang
 
+## Motivating Question:
+Our team aimed to addressing the alarming rise in drug overdose deaths in the United States,
+with 106,699 recorded deaths in 2021.(CDC, 2021) To address this critical issue, our objective is to analyze the overall trend in drug overdose deaths in the United States, examining historical data and identifying patterns and factors that have contributed to this trend. Subsequently, we aim to develop a predictive model that anticipates drug overdose deaths based on demographic, regional variables. This predictive model intend tocontribute in further intervention and prevention efforts to reduce drug overdose fatalities.
+
+## Aproach:
+- Geospatial Analysis
+- Data Visualization
+- Supervised Model for Regression Analysis:Supervised regression models will be
+employed to ascertain the influence of demographic and regional variables (e.g., race,
+gender, age, and location) on drug overdose deaths.
+
 ## Literature Review
 
 In our project, we integrate the findings of several key studies to
@@ -72,36 +83,6 @@ Census Bureau APIs, ensuring a rich dataset for analysis.
 
 **Data Description and Clean**
 
-In this project, we compiled data from various sources spanning the
-years 2015 to 2022, encompassing a wide array of indicators for each
-state. These indicators include poverty rates, population figures,
-median income levels, high school graduation numbers, land area, water
-area, and unemployment rates.
-
-To procure this diverse dataset, we employed a combination of methods,
-including direct web downloads and API access.
-
-Given the heterogeneous formats of data from different sources, our data
-cleaning process was crucial. We harnessed tools like \`pivot_longer\`
-and \`columnnames\` to standardize the data format, making it amenable
-for merging and subsequent cleaning operations.
-
-After an initial examination of the data, we systematically addressed
-missing values by either removing variables with significant data gaps
-or imputing missing values with zeros.
-
-This rigorous data preparation phase ensured the integrity and
-consistency of our dataset, setting the stage for robust analysis and
-insights.
-
-Reference: 
-[Overdose Death: CDC/National Center for Health Statistics](https://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm)
-[Poverty: United States Census Bureau](https://www.census.gov/library/publications/2023/demo/p60-280.html)
-[Area: World Population Review](https://worldpopulationreview.com/state-rankings/states-by-area)
-[Population: United States Census Bureau](https://www.census.gov/popclock/)
-[GDP: United States Census Bureau](https://data.census.gov/) 
-[High Scool Graduation Number : United States Census Bureau](https://data.census.gov/)
-[Unemployment Rate : United States Census Bureau](https://data.census.gov/)
 
 #### Geospatial Analysis
 
