@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 # Final-Project
 
 # United States Drug-Related Deaths Analysis
