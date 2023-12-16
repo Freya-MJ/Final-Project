@@ -17,12 +17,12 @@ approach, emphasizing the need for a multifaceted strategy to address
 the complex drug crisis landscape.
 
 
-#### Project Overview
+## Project Overview
 
 This study provides a comprehensive analysis of drug-related deaths in
 the United States, integrating socioeconomic data, geographic
 information, and advanced machine learning techniques to understand and
-predict mortality trends.
+predict mortality trends. The method we covered as below:
 
 #### Data Collection and Preprocessing
 
@@ -328,10 +328,7 @@ to access relevant datasets.
 2.  Store the data in a directory named `/data`.
 #### Running the Analysis
 1.  Execute the data preprocessing scripts to clean and merge datasets.
-2.  Run the geospatial analysis code to visualize drug-related death
-    trends.
-3.  Perform machine learning analysis using the provided scripts to
-    build and evaluate models.
+2.  Run the code in `index.qmd`
 #### Replicating the Study
 1.  To replicate the findings, follow the order of the scripts from data
     preprocessing to machine learning modeling.
