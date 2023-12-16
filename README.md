@@ -94,8 +94,7 @@ This rigorous data preparation phase ensured the integrity and
 consistency of our dataset, setting the stage for robust analysis and
 insights.
 
-Reference: [Overdose Death: CDC/National Center for Health
-Statistics](%5Bhttps://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm)](<https://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm>))
+Reference: [Overdose Death: CDC/National Center for Health Statistics](%5Bhttps://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm)](<https://www.cdc.gov/nchs/pressroom/sosmap/drug_poisoning_mortality/drug_poisoning.htm>))
 [Poverty: United States Census
 Bureau](%5Bhttps://www.census.gov/library/publications/2023/demo/p60-280.html)](<https://www.census.gov/library/publications/2023/demo/p60-280.html>))
 [Area: World Population
