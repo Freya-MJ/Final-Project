@@ -201,6 +201,8 @@ population, the impact of drug fatalities is substantial.
 
 ![annual drug deaths](https://github.com/Freya-MJ/Final-Project/blob/main/222222.png)
 
+![annual drug deaths](222222.png.jpg){#fig-annual drug deaths}
+
 The second chart depicts annual drug deaths, with a highlighted region
 between 2017 and 2019. This period shows a marked increase in drug
 fatalities, particularly in states like California, Florida, and New
