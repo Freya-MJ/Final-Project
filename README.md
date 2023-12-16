@@ -4,18 +4,6 @@
 
 **Team members**: Zehui Li, Lezhi Cao, Mujin Li, Xinwen Zhang
 
-## Motivating Question:
-Our team aimed to addressing the alarming rise in drug overdose deaths in the United States,
-with 106,699 recorded deaths in 2021.(CDC, 2021) To address this critical issue, our objective is to analyze the overall trend in drug overdose deaths in the United States, examining historical data and identifying patterns and factors that have contributed to this trend. Subsequently, we aim to develop a predictive model that anticipates drug overdose deaths based on demographic, regional variables. This predictive model intend tocontribute in further intervention and prevention efforts to reduce drug overdose fatalities.
-
-## Aproach:
-- Acess Data through API
-- Geospatial Analysis
-- Data Visualization
-- Supervised Model
-- Unsupervised Model
-- Data imputation
-
 ## Literature Review
 
 In our project, we integrate the findings of several key studies to
@@ -28,45 +16,6 @@ the emerging threat of fentanyl. These studies collectively inform our
 approach, emphasizing the need for a multifaceted strategy to address
 the complex drug crisis landscape.
 
-### Project Instructions
-
-#### Setting Up the Environment
-
-1.  Install R and RStudio.
-2.  Use `install.packages()` to install required libraries listed at the
-    beginning of the script.
-
-#### **API Keys**
-
-For data retrieval, you may need to apply for API keys from sources like
-the United States Census Bureau. Store these keys securely and use them
-to access relevant datasets.
-
-#### Data Acquisition
-
-1.  Download datasets from the provided links or use APIs to retrieve
-    the latest data.
-2.  Store the data in a directory named `/data`.
-
-#### Running the Analysis
-
-1.  Execute the data preprocessing scripts to clean and merge datasets.
-2.  Run the geospatial analysis code to visualize drug-related death
-    trends.
-3.  Perform machine learning analysis using the provided scripts to
-    build and evaluate models.
-
-#### Replicating the Study
-
-1.  To replicate the findings, follow the order of the scripts from data
-    preprocessing to machine learning modeling.
-2.  For predictive modeling, ensure cross-validation and model tuning
-    steps are correctly executed.
-
-#### Contributing
-
--   If you wish to contribute to this project, please fork the
-    repository and submit a pull request.
 
 #### Project Overview
 
@@ -81,9 +30,6 @@ Datasets encompassing poverty rates, unemployment figures, GDP,
 population, area, income levels, and high school graduation rates were
 meticulously cleaned and merged. Additional data were retrieved using
 Census Bureau APIs, ensuring a rich dataset for analysis.
-
-**Data Description and Clean**
-
 
 #### Geospatial Analysis
 
@@ -366,6 +312,35 @@ influencing drug mortality rates. These limitations highlight the need
 for continuous data updates and more sophisticated models that can adapt
 to evolving societal dynamics.
 
+## Project Instructions
+
+#### Setting Up the Environment
+1.  Install R and RStudio.
+2.  Use `install.packages()` to install required libraries listed at the
+    beginning of the script.
+#### **API Keys**
+For data retrieval, you need to apply for API keys from sources like
+the United States Census Bureau. Store these keys securely and use them
+to access relevant datasets.
+#### Data Acquisition
+1.  Download datasets from the provided links or use APIs to retrieve
+    the latest data.
+2.  Store the data in a directory named `/data`.
+#### Running the Analysis
+1.  Execute the data preprocessing scripts to clean and merge datasets.
+2.  Run the geospatial analysis code to visualize drug-related death
+    trends.
+3.  Perform machine learning analysis using the provided scripts to
+    build and evaluate models.
+#### Replicating the Study
+1.  To replicate the findings, follow the order of the scripts from data
+    preprocessing to machine learning modeling.
+2.  For predictive modeling, ensure cross-validation and model tuning
+    steps are correctly executed.
+#### Contributing
+-   If you wish to contribute to this project, please fork the
+    repository and submit a pull request.
+    
 ## References
 
 1.  C. Merrall, E. L., Kariminia, A., Binswanger, I. A., Hobbs, M. S.,
